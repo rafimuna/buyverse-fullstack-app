@@ -2,11 +2,11 @@ import axios from 'axios';
 import { API_BASE_URL } from './config';
 
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/`,
+  baseURL: API_BASE_URL.replace(/\/$/, ''), // শেষের / তুলে দেয়া হলো যাতে double-slash না হয়
 });
 
 // যেসব API এন্ডপয়েন্টে Authorization হেডার পাঠানো যাবে না (Public Endpoints)
-const publicEndpoints = ['home/'];
+const publicEndpoints = ['home', 'products', 'categories'];
 
 // Request Interceptor: প্রতিটা API রিকোয়েস্ট যাওয়ার আগে টোকেন চেক করবে
 api.interceptors.request.use(
