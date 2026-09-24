@@ -22,7 +22,7 @@ export default function HomePage() {
     const fetchHomeData = async () => {
       try {
         setLoading(true);
-        const response = await api.get('home/');
+        const response = await api.get('/api/home/');
         
         setBanners(response.data.banners || []);
         setProducts(response.data.featured_products || response.data.products || []);
