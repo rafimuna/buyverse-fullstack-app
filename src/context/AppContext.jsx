@@ -1,10 +1,9 @@
 // src/context/AppContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config';
 
 export const AppContext = createContext();
-
-const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export const AppProvider = ({ children }) => {
   // ১. Cart State (LocalStorage Persistence Initializer)

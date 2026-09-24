@@ -5,13 +5,13 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 // Swiper modules
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion } from 'framer-motion'; // 👈 ১. Framer Motion ইমপোর্ট করা হলো
+import { getMediaUrl } from '../config';
 
 // Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
 const DEFAULT_BANNER_IMG = 'https://picsum.photos/1200/500';
 
 export default function Banner({ banners = [] }) {
@@ -22,10 +22,7 @@ export default function Banner({ banners = [] }) {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return DEFAULT_BANNER_IMG;
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    return `${BACKEND_URL}${imagePath}`;
+    return getMediaUrl(imagePath);
   };
 
   // 👈 ২. অ্যানিমেশন ভ্যারিয়েন্ট (Staggered Animation)

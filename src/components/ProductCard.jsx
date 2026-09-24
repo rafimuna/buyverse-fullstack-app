@@ -11,9 +11,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AppContext } from '../context/AppContext';
-
-// Django Backend URL
-const API_BASE_URL = 'http://127.0.0.1:8000';
+import { getMediaUrl } from '../config';
 
 export default function ProductCard({
   product,
@@ -47,10 +45,7 @@ export default function ProductCard({
   // -----------------------------
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80';
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    return `${API_BASE_URL}${imagePath}`;
+    return getMediaUrl(imagePath);
   };
 
   // -----------------------------
