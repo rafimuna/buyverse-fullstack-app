@@ -4,8 +4,6 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import ProductCard from '../components/ProductCard';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
-
 export default function SearchResults() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
@@ -50,11 +48,7 @@ export default function SearchResults() {
       return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80';
     }
 
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-
-    return `${API_BASE_URL}${imagePath}`;
+    return imagePath;
   };
 
   const getCategoryLabel = (product) => {

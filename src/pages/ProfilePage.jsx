@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import { API_BASE_URL } from "../config";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const ProfilePage = () => {
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem("access"); // আপনার টোকেন কি-নাম অনুযায়ী চেক করে নেবেন
-      const response = await axios.get("http://127.0.0.1:8000/api/accounts/profile/", {
+      const response = await axios.get(`${API_BASE_URL}/api/accounts/profile/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

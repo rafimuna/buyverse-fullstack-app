@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { ShoppingCart, ArrowLeft, Star, ShieldCheck, Truck } from 'lucide-react';
+import { getMediaUrl } from '../config';
 
 export default function ProductDetails() {
   const { id } = useParams(); // URL থেকে প্রোডাক্টের ID নেওয়া হচ্ছে
@@ -44,7 +45,7 @@ export default function ProductDetails() {
         {/* Left Column: Image */}
         <div className="flex items-center justify-center bg-slate-50 rounded-xl overflow-hidden p-4">
           <img
-            src={product.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80'}
+            src={getMediaUrl(product.image) || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80'}
             alt={product.name}
             className="w-full h-80 md:h-96 object-contain rounded-lg"
           />

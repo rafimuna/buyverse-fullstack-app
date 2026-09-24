@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, User, Heart, Menu, X, ArrowRight } from 'lucide-react';
 import { AppContext } from '../context/AppContext';
+import { getMediaUrl } from '../config';
 
 export default function Navbar() {
   const { categories = [], cartCount, wishlistCount, isCartAnimated, user, products = [] } = useContext(AppContext);
@@ -137,7 +138,7 @@ export default function Navbar() {
                       >
                         {product.image && (
                           <img 
-                            src={product.image} 
+                            src={getMediaUrl(product.image)} 
                             alt={product.name} 
                             className="w-10 h-10 object-cover rounded-lg border border-slate-100"
                           />

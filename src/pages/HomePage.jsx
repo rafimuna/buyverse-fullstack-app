@@ -6,6 +6,7 @@ import ProductCard from '../components/ProductCard';
 import TrustBadges from '../components/TrustBadges';
 import Footer from '../components/Footer';
 import { AppContext } from '../context/AppContext';
+import { getMediaUrl } from '../config';
 
 export default function HomePage() {
   const { addToCart } = useContext(AppContext);
@@ -115,7 +116,7 @@ export default function HomePage() {
             </button>
 
             <img
-              src={quickViewProduct.image || 'https://via.placeholder.com/300'}
+              src={getMediaUrl(quickViewProduct.image) || 'https://via.placeholder.com/300'}
               alt={quickViewProduct.name}
               className="w-full h-56 object-cover rounded-2xl mb-4"
             />

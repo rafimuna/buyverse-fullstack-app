@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, LogIn, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function LoginPage() {
         password: data.password,
       };
 
-      const response = await axios.post('http://127.0.0.1:8000/api/token/', payload);
+      const response = await axios.post(`${API_BASE_URL}/api/token/`, payload);
 
       // LocalStorage-এ Tokens সেভ করা
       localStorage.setItem('access', response.data.access);

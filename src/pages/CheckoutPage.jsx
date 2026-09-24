@@ -3,8 +3,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { ShoppingBag, ArrowLeft, CheckCircle2, ShieldCheck, Truck, CreditCard, Loader2 } from 'lucide-react';
+import { API_BASE_URL, getMediaUrl } from '../config';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export default function CheckoutPage() {
   const { cartItems, setCartItems, clearCart, products } = useContext(AppContext);
@@ -38,10 +38,7 @@ export default function CheckoutPage() {
   // 🟢 Helper to fix absolute/relative image path
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://via.placeholder.com/100';
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    return `${API_BASE_URL}${imagePath}`;
+    return getMediaUrl(imagePath);
   };
 
   // 🟢 ১. ব্যাকএন্ড থেকে কার্ট ডাটা সিঙ্ক (JWT Bearer Auth)

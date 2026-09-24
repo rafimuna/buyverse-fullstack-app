@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, UserPlus, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function RegisterPage() {
         role: 'ADMIN', // জ্যাঙ্গো Serializer-এর চাহিদানুযায়ী role পাঠানো হচ্ছে
       };
 
-      await axios.post('http://127.0.0.1:8000/api/accounts/register/', payload);
+      await axios.post(`${API_BASE_URL}/api/accounts/register/`, payload);
 
       alert('Registration successful! Please login.');
       navigate('/login');
