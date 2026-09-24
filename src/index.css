@@ -1,0 +1,11 @@
+@import "tailwindcss";
+/* Swiper Custom Navigation & Pagination Theme */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #ffffff !important;
+  transform: scale(0.6);
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #6366f1 !important; /* Indigo color */
+}

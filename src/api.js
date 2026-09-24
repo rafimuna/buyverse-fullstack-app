@@ -1,0 +1,36 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/',
+  
+});
+
+// যেসব API এন্ডপয়েন্টে Authorization হেডার পাঠানো যাবে না (Public Endpoints)
+const publicEndpoints = ['home/'];
+
+// Request Interceptor: প্রতিটা API রিকোয়েস্ট যাওয়ার আগে টোকেন চেক করবে
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token') || localStorage.getItem('access');
+
+    // রিকোয়েস্টের URL টি পাবলিক লিস্টে আছে কিনা চেক করা
+    const isPublicEndpoint = publicEndpoints.some((url) =>
+      config.url.endsWith(url)
+    );
+
+    // টোকেন থাকলে এবং এন্ডপয়েন্টটি পাবলিক না হলেই কেবল হেডার যুক্ত হবে
+    if (token && !isPublicEndpoint) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      // পাবলিক এন্ডপয়েন্টের জন্য কোনো Authorization হেডার থাকবে না
+      delete config.headers.Authorization;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export default api;
