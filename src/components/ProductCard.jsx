@@ -58,16 +58,13 @@ export default function ProductCard({
   // -----------------------------
   const basePrice = selectedVariant ? Number(selectedVariant.price) : Number(product.price) || 0;
   const discountPrice = Number(product.discount_price) || 0;
+  const discountPercentage = Number(product.discount_percentage) || 0;
   const stock = selectedVariant?.stock !== undefined 
     ? Number(selectedVariant.stock) 
     : (product.stock !== undefined ? Number(product.stock) : 10);
 
-  const hasDiscount = discountPrice > 0 && discountPrice < basePrice;
+  const hasDiscount = discountPercentage > 0 && discountPrice > 0 && discountPrice < basePrice;
   const finalPrice = hasDiscount ? discountPrice : basePrice;
-
-  const discountPercentage = hasDiscount
-    ? Math.round(((basePrice - discountPrice) / basePrice) * 100)
-    : 0;
 
   const isOutOfStock = stock <= 0;
   const isLowStock = stock > 0 && stock <= 5;
