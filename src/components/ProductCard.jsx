@@ -33,47 +33,38 @@ export default function ProductCard({
   );
 
   useEffect(() => {
-    if (variants.length > 0) {
-      setSelectedVariant(variants[0]);
-    }
-  }, [product]);
+    setSelectedVariant(variants.length > 0 ? variants[0] : null);
+  }, [product?.id]);
 
   if (!product) return null;
 
-  // Dynamic Image Extractor (Checks multiple possible key names)
+  // Dynamic Image Extractor
   const resolveProductImage = () => {
-    // 1. Variant image check (if available)
-    if (selectedVariant && selectedVariant.image) {
-      const vImg = getMediaUrl(selectedVariant.image);
+    // 1. Selected Variant Image Check
+    if (selectedVariant && (selectedVariant.image_url || selectedVariant.image)) {
+      const vImg = getMediaUrl(selectedVariant.image_url || selectedVariant.image);
       if (vImg) return vImg;
     }
 
-    // 2. Main Product primary fields
-    const rawImage = product.image || product.image_url || product.imageUrl || product.primary_image || product.thumbnail || product.featured_image;
+    // 2. Main Product Image Check
+    const rawImage = product.image_url || product.image;
 
-    // 3. If product images are inside an Array (e.g. product.images = [{ image: '/media/...' }])
-    if (!rawImage && Array.isArray(product.images) && product.images.length > 0) {
-      const firstImg = product.images[0]?.image || product.images[0];
-      return getMediaUrl(firstImg);
-    }
-
-    // 4. Return processed URL
+    // 3. Process URL
     const finalUrl = getMediaUrl(rawImage);
     return finalUrl || PRODUCT_IMAGE_FALLBACK;
   };
 
   const currentImage = resolveProductImage();
 
-  // Price & Stock Calculations
-  const basePrice = selectedVariant ? Number(selectedVariant.price) : Number(product.price) || 0;
-  const discountPrice = Number(product.discount_price) || 0;
-  const discountPercentage = Number(product.discount_percentage) || 0;
+  // Price & Stock Calculations (Refactored for Accuracy)
+  const activeItem = selectedVariant || product;
+  const basePrice = Number(activeItem?.price) || 0;
+  const finalPrice = Number(activeItem?.final_price || activeItem?.discount_price) || basePrice;
+  const hasDiscount = finalPrice > 0 && finalPrice < basePrice;
+
   const stock = selectedVariant?.stock !== undefined 
     ? Number(selectedVariant.stock) 
-    : (product.stock !== undefined ? Number(product.stock) : 10);
-
-  const hasDiscount = discountPercentage > 0 && discountPrice > 0 && discountPrice < basePrice;
-  const finalPrice = hasDiscount ? discountPrice : basePrice;
+    : (product.stock !== undefined ? Number(product.stock) : 0);
 
   const isOutOfStock = stock <= 0;
   const isLowStock = stock > 0 && stock <= 5;
@@ -170,7 +161,7 @@ export default function ProductCard({
         {/* Discount Badge */}
         {hasDiscount && !isOutOfStock && (
           <span className="absolute left-3 top-3 rounded-lg bg-rose-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm pointer-events-none">
-            -{discountPercentage}%
+            -{Math.round(((basePrice - finalPrice) / basePrice) * 100)}%
           </span>
         )}
 
@@ -269,9 +260,10 @@ export default function ProductCard({
                 const colorName = v.color_detail?.name || '';
                 const sizeName = v.size_detail?.name || '';
                 const label = [colorName, sizeName].filter(Boolean).join(' - ') || `Variant #${v.id}`;
+                const vPrice = Number(v.final_price || v.price);
                 return (
                   <option key={v.id} value={v.id}>
-                    {label} (৳{v.price})
+                    {label} (৳{vPrice})
                   </option>
                 );
               })}
@@ -342,5 +334,3 @@ export default function ProductCard({
     </motion.article>
   );
 }
-
-// new code 
