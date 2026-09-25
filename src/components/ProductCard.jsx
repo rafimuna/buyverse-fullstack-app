@@ -13,6 +13,8 @@ import { motion } from 'framer-motion';
 import { AppContext } from '../context/AppContext';
 import { getMediaUrl } from '../config';
 
+const PRODUCT_IMAGE_FALLBACK = 'https://placehold.co/400x400/e2e8f0/475569?text=No+Image';
+
 export default function ProductCard({
   product,
   onAddToCart,
@@ -47,7 +49,7 @@ export default function ProductCard({
     }
 
     // 2. Main Product primary fields
-    const rawImage = product.image || product.primary_image || product.thumbnail || product.featured_image;
+    const rawImage = product.image || product.image_url || product.imageUrl || product.primary_image || product.thumbnail || product.featured_image;
 
     // 3. If product images are inside an Array (e.g. product.images = [{ image: '/media/...' }])
     if (!rawImage && Array.isArray(product.images) && product.images.length > 0) {
@@ -57,7 +59,7 @@ export default function ProductCard({
 
     // 4. Return processed URL
     const finalUrl = getMediaUrl(rawImage);
-    return finalUrl || 'https://placehold.co/400x400/e2e8f0/475569?text=No+Image';
+    return finalUrl || PRODUCT_IMAGE_FALLBACK;
   };
 
   const currentImage = resolveProductImage();
@@ -160,7 +162,7 @@ export default function ProductCard({
             }`}
             onError={(event) => {
               event.currentTarget.onerror = null;
-              event.currentTarget.src = 'https://via.placeholder.com/400x400?text=No+Image';
+              event.currentTarget.src = PRODUCT_IMAGE_FALLBACK;
             }}
           />
         </Link>
