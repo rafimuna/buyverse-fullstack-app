@@ -339,3 +339,5 @@ export default function ProductCard({
     </motion.article>
   );
 }
+
+// new code 
