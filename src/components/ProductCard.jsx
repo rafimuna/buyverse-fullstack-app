@@ -57,7 +57,7 @@ export default function ProductCard({
 
     // 4. Return processed URL
     const finalUrl = getMediaUrl(rawImage);
-    return finalUrl || 'https://via.placeholder.com/400x400?text=No+Image';
+    return finalUrl || 'https://placehold.co/400x400/e2e8f0/475569?text=No+Image';
   };
 
   const currentImage = resolveProductImage();
@@ -159,6 +159,7 @@ export default function ProductCard({
               isOutOfStock ? 'opacity-60 grayscale' : ''
             }`}
             onError={(event) => {
+              event.currentTarget.onerror = null;
               event.currentTarget.src = 'https://via.placeholder.com/400x400?text=No+Image';
             }}
           />
