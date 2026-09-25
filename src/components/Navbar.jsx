@@ -1,7 +1,6 @@
-// src/components/Navbar.jsx
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, User, Heart, Menu, X, ArrowRight } from 'lucide-react';
+import { Search, ShoppingCart, User, Heart, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { AppContext } from '../context/AppContext';
 import { getMediaUrl } from '../config';
 
@@ -12,8 +11,10 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   
   const searchRef = useRef(null);
+  const categoryRef = useRef(null);
   const navigate = useNavigate();
 
   const normalizeText = (value) => String(value ?? '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
@@ -49,7 +50,7 @@ export default function Navbar() {
     return queryTerms.every((term) => searchableText.includes(term));
   };
 
-  // ১. ডাইনামিক ফিল্টারিং লজিক (ইনপুটে টাইপ করার সাথে সাথেই ফিল্টার হবে)
+  // 1. Dynamic Search Filtering
   useEffect(() => {
     const trimmedQuery = searchQuery.trim();
 
@@ -63,18 +64,21 @@ export default function Navbar() {
     }
   }, [searchQuery, products]);
 
-  // ২. সার্চ ইনপুট বক্সের বাইরে ক্লিক করলে সাজেশন ড্রপডাউন হাইড হবে
+  // 2. Click outside handler for search & category dropdown
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowDropdown(false);
+      }
+      if (categoryRef.current && !categoryRef.current.contains(e.target)) {
+        setCategoryDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ৩. ফর্ম সাবমিট হ্যান্ডলার (Enter চাপলে সার্চ রেজাল্ট পেজে নিয়ে যাবে)
+  // 3. Search Form Submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -83,7 +87,7 @@ export default function Navbar() {
     }
   };
 
-  // ৪. সাজেশন ড্রপডাউন থেকে নির্দিষ্ট প্রোডাক্টে ক্লিক করলে সরাসরি প্রোডাক্ট ডিটেইলসে যাবে
+  // 4. Select Product
   const handleSelectProduct = (productId) => {
     setShowDropdown(false);
     setSearchQuery('');
@@ -96,17 +100,57 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 gap-4">
           
           {/* Logo & Mobile Menu Toggle */}
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-slate-700 hover:text-indigo-600 p-1 rounded-lg focus:outline-none"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-            
-            <Link to="/" className="text-2xl font-black text-indigo-600 tracking-tight">
-              Buy<span className="text-slate-800">Verse</span>
-            </Link>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-slate-700 hover:text-indigo-600 p-1 rounded-lg focus:outline-none"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+              
+              <Link to="/" className="text-2xl font-black text-indigo-600 tracking-tight">
+                Buy<span className="text-slate-800">Verse</span>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation Links (ADDED HERE) */}
+            <div className="hidden lg:flex items-center gap-5 text-sm font-semibold text-slate-700">
+              <Link to="/" className="hover:text-indigo-600 transition">
+                Home
+              </Link>
+              <Link to="/products" className="hover:text-indigo-600 transition">
+                All Products
+              </Link>
+
+              {/* Desktop Category Dropdown */}
+              {categories.length > 0 && (
+                <div ref={categoryRef} className="relative">
+                  <button 
+                    onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                    className="flex items-center gap-1 hover:text-indigo-600 transition py-2 focus:outline-none"
+                  >
+                    <span>Categories</span>
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${categoryDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {categoryDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50">
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.id || cat.slug}
+                          to={`/category/${cat.slug || cat.id}`}
+                          className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition"
+                          onClick={() => setCategoryDropdownOpen(false)}
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Desktop Search Bar with Live Dropdown */}
