@@ -24,9 +24,7 @@ export default function ProductCard({
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
-  // -----------------------------
-  // Variant Setup & State
-  // -----------------------------
+  // Variant Setup
   const variants = product?.variants || [];
   const [selectedVariant, setSelectedVariant] = useState(
     variants.length > 0 ? variants[0] : null
@@ -40,17 +38,31 @@ export default function ProductCard({
 
   if (!product) return null;
 
-  // -----------------------------
-  // Dynamic Image URL Helper
-  // -----------------------------
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80';
-    return getMediaUrl(imagePath);
+  // Dynamic Image Extractor (Checks multiple possible key names)
+  const resolveProductImage = () => {
+    // 1. Variant image check (if available)
+    if (selectedVariant && selectedVariant.image) {
+      const vImg = getMediaUrl(selectedVariant.image);
+      if (vImg) return vImg;
+    }
+
+    // 2. Main Product primary fields
+    const rawImage = product.image || product.primary_image || product.thumbnail || product.featured_image;
+
+    // 3. If product images are inside an Array (e.g. product.images = [{ image: '/media/...' }])
+    if (!rawImage && Array.isArray(product.images) && product.images.length > 0) {
+      const firstImg = product.images[0]?.image || product.images[0];
+      return getMediaUrl(firstImg);
+    }
+
+    // 4. Return processed URL
+    const finalUrl = getMediaUrl(rawImage);
+    return finalUrl || 'https://via.placeholder.com/400x400?text=No+Image';
   };
 
-  // -----------------------------
-  // Product Calculations
-  // -----------------------------
+  const currentImage = resolveProductImage();
+
+  // Price & Stock Calculations
   const basePrice = selectedVariant ? Number(selectedVariant.price) : Number(product.price) || 0;
   const discountPrice = Number(product.discount_price) || 0;
   const discountPercentage = Number(product.discount_percentage) || 0;
@@ -65,23 +77,19 @@ export default function ProductCard({
   const isLowStock = stock > 0 && stock <= 5;
   const ratingValue = Number(product.rating) || 4.8;
 
-  // -----------------------------
-  // Handlers
-  // -----------------------------
   const handleVariantChange = (e) => {
     const variantId = parseInt(e.target.value, 10);
     const chosen = variants.find((v) => v.id === variantId);
     setSelectedVariant(chosen);
   };
 
-  // 🛒 Cart Execute Logic (Callback সাপোর্টসহ)
   const executeAddToCart = async (callback) => {
     const itemToAdd = {
       ...product,
       id: product.id,
       name: product.name || product.title,
       price: finalPrice,
-      image: getImageUrl(selectedVariant?.image || product.image),
+      image: currentImage,
       selectedVariant: selectedVariant || null
     };
 
@@ -89,23 +97,17 @@ export default function ProductCard({
       await onAddToCart(itemToAdd, selectedVariant);
       if (callback) callback();
     } else if (addToCart) {
-      // AppContext-এর async addToCart রান করবে এবং শেষ হলে callback ডাকবে
       await addToCart(itemToAdd, callback);
     }
   };
 
-  // 🛒 1. Standard Add to Cart Handler
   const handleAddToCart = async () => {
     if (isOutOfStock || isAdding) return;
-
     try {
       setIsAdding(true);
       await executeAddToCart();
-
       setIsAdded(true);
-      setTimeout(() => {
-        setIsAdded(false);
-      }, 2000);
+      setTimeout(() => setIsAdded(false), 2000);
     } catch (error) {
       console.error('Add to cart failed:', error);
     } finally {
@@ -113,15 +115,11 @@ export default function ProductCard({
     }
   };
 
-  // ⚡ 2. Direct Buy Now Handler (Fix: Callback ডাকার পর navigate করা হচ্ছে)
   const handleBuyNow = async () => {
     if (isOutOfStock || isAdding) return;
-
     try {
       setIsAdding(true);
-      await executeAddToCart(() => {
-        navigate('/checkout'); // নিশ্চিতভাবে ব্যাকএন্ডে সেভ হওয়ার পরই পেজ পরিবর্তন হবে
-      });
+      await executeAddToCart(() => navigate('/checkout'));
     } catch (error) {
       console.error('Buy now failed:', error);
     } finally {
@@ -138,12 +136,8 @@ export default function ProductCard({
 
   const handleQuickView = (e) => {
     e.preventDefault();
-    if (onQuickView) {
-      onQuickView(product);
-    }
+    if (onQuickView) onQuickView(product);
   };
-
-  const currentImage = getImageUrl(selectedVariant?.image || product.image);
 
   return (
     <motion.article
@@ -165,8 +159,7 @@ export default function ProductCard({
               isOutOfStock ? 'opacity-60 grayscale' : ''
             }`}
             onError={(event) => {
-              event.currentTarget.src =
-                'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80';
+              event.currentTarget.src = 'https://via.placeholder.com/400x400?text=No+Image';
             }}
           />
         </Link>
@@ -183,21 +176,11 @@ export default function ProductCard({
           whileTap={{ scale: 0.8 }}
           type="button"
           onClick={handleWishlist}
-          aria-label={
-            isWishlisted
-              ? `Remove ${product.name} from wishlist`
-              : `Add ${product.name} to wishlist`
-          }
           className={`absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition-all duration-200 hover:scale-110 ${
-            isWishlisted
-              ? 'text-rose-500'
-              : 'text-slate-600 hover:text-rose-500'
+            isWishlisted ? 'text-rose-500' : 'text-slate-600 hover:text-rose-500'
           }`}
         >
-          <Heart
-            size={18}
-            fill={isWishlisted ? 'currentColor' : 'none'}
-          />
+          <Heart size={18} fill={isWishlisted ? 'currentColor' : 'none'} />
         </motion.button>
 
         {/* Quick View Button */}
@@ -252,14 +235,8 @@ export default function ProductCard({
               />
             ))}
           </div>
-
-          <span className="text-xs font-medium text-slate-600">
-            {ratingValue}
-          </span>
-
-          <span className="text-xs text-slate-400">
-            ({product.review_count || 0} reviews)
-          </span>
+          <span className="text-xs font-medium text-slate-600">{ratingValue}</span>
+          <span className="text-xs text-slate-400">({product.review_count || 0} reviews)</span>
         </div>
 
         {/* Price */}
@@ -267,7 +244,6 @@ export default function ProductCard({
           <span className="text-xl font-bold text-slate-900">
             ৳{finalPrice.toLocaleString('en-BD')}
           </span>
-
           {hasDiscount && (
             <span className="text-sm text-slate-400 line-through">
               ৳{basePrice.toLocaleString('en-BD')}
@@ -290,7 +266,6 @@ export default function ProductCard({
                 const colorName = v.color_detail?.name || '';
                 const sizeName = v.size_detail?.name || '';
                 const label = [colorName, sizeName].filter(Boolean).join(' - ') || `Variant #${v.id}`;
-
                 return (
                   <option key={v.id} value={v.id}>
                     {label} (৳{v.price})
@@ -304,13 +279,9 @@ export default function ProductCard({
         {/* Stock status */}
         <div className="mb-4">
           {isOutOfStock ? (
-            <span className="text-xs font-semibold text-rose-500">
-              Out of stock
-            </span>
+            <span className="text-xs font-semibold text-rose-500">Out of stock</span>
           ) : isLowStock ? (
-            <span className="text-xs font-semibold text-amber-600">
-              Only {stock} left
-            </span>
+            <span className="text-xs font-semibold text-amber-600">Only {stock} left</span>
           ) : (
             <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -321,13 +292,11 @@ export default function ProductCard({
 
         {/* ACTION BUTTONS */}
         <div className="mt-auto grid grid-cols-2 gap-2">
-          {/* Add To Cart Button */}
           <motion.button
             whileTap={{ scale: 0.96 }}
             type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock || isAdding}
-            aria-label={`Add ${product.name} to cart`}
             className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200 ${
               isOutOfStock
                 ? 'cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
@@ -348,17 +317,14 @@ export default function ProductCard({
                 <ShoppingCart size={15} />
                 Cart
               </>
-            )
-            }
+            )}
           </motion.button>
 
-          {/* Buy Now Button */}
           <motion.button
             whileTap={{ scale: 0.96 }}
             type="button"
             onClick={handleBuyNow}
             disabled={isOutOfStock || isAdding}
-            aria-label={`Buy ${product.name} now`}
             className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold transition-all duration-200 ${
               isOutOfStock
                 ? 'cursor-not-allowed bg-slate-100 text-slate-400 border border-slate-200'
