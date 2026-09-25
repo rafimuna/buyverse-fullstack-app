@@ -145,7 +145,7 @@ export const AppProvider = ({ children }) => {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({
-          product: product.id,
+          product_id: product.id,
           quantity: 1,
         }),
       });
