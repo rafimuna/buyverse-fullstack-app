@@ -8,6 +8,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import { Toaster } from 'react-hot-toast';
 import ProductDetails from './pages/ProductDetails';
 import ProfilePage from './pages/ProfilePage';
+import ProductsPage from './pages/ProductsPage';
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/category/:slug" element={<ProductsPage />} />
       </Routes>
     </Router>
     </AppProvider>
