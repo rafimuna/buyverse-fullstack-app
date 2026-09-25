@@ -38,6 +38,10 @@ export default function ProductCard({
 
   if (!product) return null;
 
+  console.log(`Product [${product?.name}] Raw Data:`, product);
+  console.log(`Product Image from Backend:`, product?.image);
+  console.log(`Product Image URL from Backend:`, product?.image_url);
+
   // Dynamic Image Extractor
   const resolveProductImage = () => {
     // 1. Selected Variant Image Check
